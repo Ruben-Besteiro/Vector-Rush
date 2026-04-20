@@ -457,7 +457,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   forwardSpeed: 7.5
   lateralSpeed: 5
-  jumpForce: 4.9
+  jumpForce: 7
   gravity: -9.81
   jumpAction:
     m_UseReference: 1
