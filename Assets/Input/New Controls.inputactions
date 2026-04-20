@@ -2,7 +2,7 @@
     "name": "New Controls",
     "maps": [
         {
-            "name": "Sidestep",
+            "name": "Player",
             "id": "3b33010b-360a-4c4d-84f9-f6d39e071c5d",
             "actions": [
                 {

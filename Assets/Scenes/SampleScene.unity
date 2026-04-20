@@ -456,10 +456,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   forwardSpeed: 7.5
-  lateralSpeed: 1.5
-  jumpForce: 9.81
+  lateralSpeed: 5
+  jumpForce: 4.9
   gravity: -9.81
-  maxXMovement: 10
   jumpAction:
     m_UseReference: 1
     m_Action:
@@ -518,6 +517,9 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 8006774834342263616, guid: acbb3fb8891a70141ad28c4388d2a684,
       type: 3}
+  sidestepDistance: 3
+  sidestepDuration: 0.15
+  sidestepCooldown: 0.5
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

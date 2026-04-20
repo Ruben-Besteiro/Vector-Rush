@@ -4,13 +4,10 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movimiento")]
-    [SerializeField] private float forwardSpeed = 7.5f;
-    [SerializeField] private float lateralSpeed = 5f;
-    [SerializeField] private float jumpForce = 20f;
-    [SerializeField] private float gravity = -9.81f;
-
-    [Header("Límites laterales")]
-    [SerializeField] private float maxXMovement = 10f;
+    [SerializeField] private float forwardSpeed;
+    [SerializeField] private float lateralSpeed;
+    [SerializeField] private float jumpForce;
+    [SerializeField] private float gravity;
 
     [Header("Inputs")]
     [SerializeField] private InputActionProperty jumpAction;
@@ -24,9 +21,9 @@ public class PlayerController : MonoBehaviour
     private float sidestepDirection = 0f;
     private float sidestepStartX;
     private float sidestepTargetX;
-    private float sidestepDuration;
-    private float sidestepDistance;
-    private float sidestepCooldown;
+    [SerializeField] private float sidestepDistance = 3f;
+    [SerializeField] private float sidestepDuration = 0.15f;
+    [SerializeField] private float sidestepCooldown = 0.5f;
 
     // Gravedad / salto
     private float verticalVelocity = 0f;
@@ -103,15 +100,15 @@ public class PlayerController : MonoBehaviour
         {
             Vector3 worldMousePos = ray.GetPoint(distance);
 
-            float targetX = Mathf.Clamp(worldMousePos.x, -maxXMovement, maxXMovement);
+            float targetX = Mathf.Lerp(transform.position.x, worldMousePos.x, lateralSpeed * Time.deltaTime);
 
-            float newX = Mathf.Lerp(transform.position.x, targetX, lateralSpeed * Time.deltaTime);
-            transform.position = new Vector3(newX, transform.position.y, transform.position.z);
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(targetX, transform.position.y, transform.position.z), lateralSpeed * Time.deltaTime);
         }
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
     {
+        print("Le diste al espacio");
         if (!isGrounded) return;
 
         verticalVelocity = jumpForce;
@@ -139,14 +136,16 @@ public class PlayerController : MonoBehaviour
 
     private void OnSidestep(InputAction.CallbackContext ctx)
     {
+        print("Le diste a la A o a la D");
         if (isSidestepping || sidestepCooldownTimer > 0f) return;
+        print("Hola buenos días");
 
         float input = ctx.ReadValue<float>();
         if (Mathf.Approximately(input, 0f)) return;
 
         sidestepDirection = Mathf.Sign(input);
         sidestepStartX = transform.position.x;
-        sidestepTargetX = Mathf.Clamp(sidestepStartX + sidestepDirection * sidestepDistance, -maxXMovement, maxXMovement);
+        sidestepTargetX = sidestepStartX + sidestepDirection * sidestepDistance;
 
         isSidestepping = true;
         sidestepTimer = 0f;
