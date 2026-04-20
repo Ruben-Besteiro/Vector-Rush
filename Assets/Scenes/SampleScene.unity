@@ -455,13 +455,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1fb3a44fa2c2f54c8ca774116d082f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  forwardSpeed: 5
-  lateralSpeed: 5
-  jumpForce: 20
+  forwardSpeed: 7.5
+  lateralSpeed: 1.5
+  jumpForce: 9.81
   gravity: -9.81
   maxXMovement: 10
   jumpAction:
-    m_UseReference: 0
+    m_UseReference: 1
     m_Action:
       m_Name: Jump
       m_Type: 0
@@ -479,9 +479,10 @@ MonoBehaviour:
         m_Action: Jump
         m_Flags: 0
       m_Flags: 0
-    m_Reference: {fileID: 0}
+    m_Reference: {fileID: -7938374322303380206, guid: acbb3fb8891a70141ad28c4388d2a684,
+      type: 3}
   sidestepAction:
-    m_UseReference: 0
+    m_UseReference: 1
     m_Action:
       m_Name: Sidestep
       m_Type: 0
@@ -515,7 +516,8 @@ MonoBehaviour:
         m_Action: Sidestep
         m_Flags: 8
       m_Flags: 0
-    m_Reference: {fileID: 0}
+    m_Reference: {fileID: 8006774834342263616, guid: acbb3fb8891a70141ad28c4388d2a684,
+      type: 3}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movimiento")]
-    [SerializeField] private float forwardSpeed = 5f;
+    [SerializeField] private float forwardSpeed = 7.5f;
     [SerializeField] private float lateralSpeed = 5f;
     [SerializeField] private float jumpForce = 20f;
     [SerializeField] private float gravity = -9.81f;
@@ -24,10 +24,15 @@ public class PlayerController : MonoBehaviour
     private float sidestepDirection = 0f;
     private float sidestepStartX;
     private float sidestepTargetX;
+    private float sidestepDuration;
+    private float sidestepDistance;
+    private float sidestepCooldown;
 
     // Gravedad / salto
     private float verticalVelocity = 0f;
     private bool isGrounded = true;
+    float groundY = 1;
+
 
     void OnEnable()
     {
@@ -73,12 +78,12 @@ public class PlayerController : MonoBehaviour
     private void UpdateSidestep()
     {
         sidestepTimer += Time.deltaTime;
-        float t = Mathf.Clamp01(sidestepTimer / dashDuration);
+        float t = Mathf.Clamp01(sidestepTimer / sidestepDuration);
 
-        // EaseOut: el dash desacelera al final
+        // EaseOut: el sidestep desacelera al final
         float easedT = 1f - Mathf.Pow(1f - t, 3f);
 
-        float newX = Mathf.Lerp(dashStartX, dashTargetX, easedT);
+        float newX = Mathf.Lerp(sidestepStartX, sidestepTargetX, easedT);
         transform.position = new Vector3(newX, transform.position.y, transform.position.z);
 
         if (t >= 1f)
@@ -141,8 +146,9 @@ public class PlayerController : MonoBehaviour
 
         sidestepDirection = Mathf.Sign(input);
         sidestepStartX = transform.position.x;
-        sidestepTargetX = Mathf.Clamp(sidestepStartX + sidestepDirection * dashDistance, -maxXMovement, maxXMovement);
+        sidestepTargetX = Mathf.Clamp(sidestepStartX + sidestepDirection * sidestepDistance, -maxXMovement, maxXMovement);
 
         isSidestepping = true;
         sidestepTimer = 0f;
     }
+}
