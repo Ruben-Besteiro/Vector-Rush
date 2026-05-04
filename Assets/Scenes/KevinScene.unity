@@ -46886,6 +46886,7 @@ GameObject:
   - component: {fileID: 1230957551}
   - component: {fileID: 1230957550}
   - component: {fileID: 1230957549}
+  - component: {fileID: 1230957552}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -46979,6 +46980,27 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!65 &1230957552
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1230957547}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!43 &1273779111
 Mesh:
   m_ObjectHideFlags: 0
@@ -67333,7 +67355,7 @@ GameObject:
   - component: {fileID: 1762827768}
   m_Layer: 0
   m_Name: --- PLAYER ---
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -67347,7 +67369,7 @@ Transform:
   m_GameObject: {fileID: 1762827762}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -16.2}
+  m_LocalPosition: {x: -7.7, y: 6.6, z: 122.48}
   m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -71761,6 +71783,7 @@ GameObject:
   - component: {fileID: 1848739423}
   - component: {fileID: 1848739422}
   - component: {fileID: 1848739421}
+  - component: {fileID: 1848739424}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -71798,7 +71821,7 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -71854,6 +71877,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1848739419}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1848739424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1848739419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c55fce7c47573d4459f530e4abe8bcde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detectionRadius: 1.5
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &1851855690
 GameObject:
   m_ObjectHideFlags: 0

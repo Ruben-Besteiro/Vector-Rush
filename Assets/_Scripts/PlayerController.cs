@@ -61,13 +61,16 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // Actualizar estado de suelo
-        isGrounded = controller.isGrounded;
+        // Actualizar estado de suelo (si la gravedad es invertida, miramos hacia arriba)
+        isGrounded = (gravity < 0) ? controller.isGrounded : (controller.collisionFlags & CollisionFlags.Above) != 0;
 
-        // Si estamos en el suelo y cayendo, mantenemos una pequeña fuerza hacia abajo
-        if (isGrounded && verticalVelocity < 0)
+        // Si estamos en el suelo y cayendo (o subiendo si la gravedad es invertida), mantenemos una pequeña fuerza
+        float groundingForce = (gravity < 0) ? -2f : 2f;
+        bool isMovingTowardsGround = (gravity < 0) ? (verticalVelocity < 0) : (verticalVelocity > 0);
+
+        if (isGrounded && isMovingTowardsGround)
         {
-            verticalVelocity = -2f;
+            verticalVelocity = groundingForce;
         }
 
         // 1. Movimiento hacia adelante (Z)
@@ -120,8 +123,14 @@ public class PlayerController : MonoBehaviour
 
     private float CalculateMouseLateralVelocity()
     {
+        if (mainCamera == null) 
+        {
+            mainCamera = Camera.main;
+            if (mainCamera == null) return 0f;
+        }
+
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-        // Creamos un plano a la altura actual del jugador
+        // Creamos un plano a la altura actual del jugador para evitar que el raycast falle si no hay suelo o está en el aire
         Plane groundPlane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
 
         if (groundPlane.Raycast(ray, out float distance))
@@ -156,5 +165,14 @@ public class PlayerController : MonoBehaviour
 
         isSidestepping = true;
         sidestepTimer = 0f;
+    }
+
+    public void InvertGravity()
+    {
+        gravity *= -1f;
+        jumpForce *= -1f;
+        
+        // Se le da la vuelta a la cámara
+        transform.Rotate(Vector3.forward, 180f);
     }
 }
