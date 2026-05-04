@@ -1,18 +1,20 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
     [Header("Movimiento")]
-    [SerializeField] private float forwardSpeed;
-    [SerializeField] private float lateralSpeed;
-    [SerializeField] private float jumpForce;
-    [SerializeField] private float gravity;
+    [SerializeField] private float forwardSpeed = 10f;
+    [SerializeField] private float lateralSpeed = 5f;
+    [SerializeField] private float jumpForce = 6f;
+    [SerializeField] private float gravity = -20f;
 
     [Header("Inputs")]
     [SerializeField] private InputActionProperty jumpAction;
     [SerializeField] private InputActionProperty sidestepAction;
 
+    private CharacterController controller;
     private Camera mainCamera;
 
     private bool isSidestepping = false;
@@ -27,9 +29,12 @@ public class PlayerController : MonoBehaviour
 
     // Gravedad / salto
     private float verticalVelocity = 0f;
-    private bool isGrounded = true;
-    float groundY = 1;
+    private bool isGrounded;
 
+    void Awake()
+    {
+        controller = GetComponent<CharacterController>();
+    }
 
     void OnEnable()
     {
@@ -56,23 +61,46 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // Movimiento hacia delante en Z
-        transform.Translate(0f, 0f, forwardSpeed * Time.deltaTime, Space.World);
+        // Actualizar estado de suelo (si la gravedad es invertida, miramos hacia arriba)
+        isGrounded = (gravity < 0) ? controller.isGrounded : (controller.collisionFlags & CollisionFlags.Above) != 0;
 
-        // Solo se puede hacer el movimiento diagonal con el ratón
-        // si no se está haciendo el sidestep
+        // Si estamos en el suelo y cayendo (o subiendo si la gravedad es invertida), mantenemos una pequeña fuerza
+        float groundingForce = (gravity < 0) ? -2f : 2f;
+        bool isMovingTowardsGround = (gravity < 0) ? (verticalVelocity < 0) : (verticalVelocity > 0);
+
+        if (isGrounded && isMovingTowardsGround)
+        {
+            verticalVelocity = groundingForce;
+        }
+
+        // 1. Movimiento hacia adelante (Z)
+        float moveZ = forwardSpeed;
+
+        // 2. Movimiento lateral (X)
+        float moveX = 0f;
         if (isSidestepping)
-            UpdateSidestep();
+        {
+            moveX = CalculateSidestepVelocity();
+        }
         else
-            MoveLateralToMouse();
+        {
+            moveX = CalculateMouseLateralVelocity();
+        }
 
-        ApplyGravity();
+        // 3. Gravedad (Y)
+        verticalVelocity += gravity * Time.deltaTime;
+        float moveY = verticalVelocity;
 
+        // Combinar y mover
+        Vector3 moveVector = new Vector3(moveX, moveY, moveZ);
+        controller.Move(moveVector * Time.deltaTime);
+
+        // Cooldown del sidestep
         if (sidestepCooldownTimer > 0f)
             sidestepCooldownTimer -= Time.deltaTime;
     }
 
-    private void UpdateSidestep()
+    private float CalculateSidestepVelocity()
     {
         sidestepTimer += Time.deltaTime;
         float t = Mathf.Clamp01(sidestepTimer / sidestepDuration);
@@ -80,65 +108,53 @@ public class PlayerController : MonoBehaviour
         // EaseOut: el sidestep desacelera al final
         float easedT = 1f - Mathf.Pow(1f - t, 3f);
 
-        float newX = Mathf.Lerp(sidestepStartX, sidestepTargetX, easedT);
-        transform.position = new Vector3(newX, transform.position.y, transform.position.z);
+        float targetX = Mathf.Lerp(sidestepStartX, sidestepTargetX, easedT);
+        float deltaX = targetX - transform.position.x;
 
         if (t >= 1f)
         {
             isSidestepping = false;
             sidestepCooldownTimer = sidestepCooldown;
         }
+
+        // Retornamos la velocidad necesaria para este frame
+        return deltaX / Time.deltaTime;
     }
 
-    private void MoveLateralToMouse()
+    private float CalculateMouseLateralVelocity()
     {
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        if (mainCamera == null) 
+        {
+            mainCamera = Camera.main;
+            if (mainCamera == null) return 0f;
+        }
 
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        // Creamos un plano a la altura actual del jugador para evitar que el raycast falle si no hay suelo o está en el aire
         Plane groundPlane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
 
         if (groundPlane.Raycast(ray, out float distance))
         {
             Vector3 worldMousePos = ray.GetPoint(distance);
-
             float targetX = Mathf.Lerp(transform.position.x, worldMousePos.x, lateralSpeed * Time.deltaTime);
-
-            transform.position = Vector3.MoveTowards(transform.position, new Vector3(targetX, transform.position.y, transform.position.z), lateralSpeed * Time.deltaTime);
+            float deltaX = targetX - transform.position.x;
+            
+            return deltaX / Time.deltaTime;
         }
+        return 0f;
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
     {
-        print("Le diste al espacio");
         if (!isGrounded) return;
 
+        print("Salto realizado");
         verticalVelocity = jumpForce;
-        isGrounded = false;
-    }
-
-    private void ApplyGravity()
-    {
-        if (isGrounded && verticalVelocity < 0f)
-            verticalVelocity = 0f;
-
-        verticalVelocity += gravity * Time.deltaTime;
-
-        float newY = transform.position.y + verticalVelocity * Time.deltaTime;
-
-        if (newY <= groundY)
-        {
-            newY = groundY;
-            verticalVelocity = 0f;
-            isGrounded = true;
-        }
-
-        transform.position = new Vector3(transform.position.x, newY, transform.position.z);
     }
 
     private void OnSidestep(InputAction.CallbackContext ctx)
     {
-        print("Le diste a la A o a la D");
         if (isSidestepping || sidestepCooldownTimer > 0f) return;
-        print("Hola buenos días");
 
         float input = ctx.ReadValue<float>();
         if (Mathf.Approximately(input, 0f)) return;
@@ -149,5 +165,14 @@ public class PlayerController : MonoBehaviour
 
         isSidestepping = true;
         sidestepTimer = 0f;
+    }
+
+    public void InvertGravity()
+    {
+        gravity *= -1f;
+        jumpForce *= -1f;
+        
+        // Se le da la vuelta a la cámara
+        transform.Rotate(Vector3.forward, 180f);
     }
 }
