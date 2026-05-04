@@ -52,7 +52,6 @@ public class BlueOrb : MonoBehaviour
         }
     }
 
-    // Visualización en el Editor
     private void OnDrawGizmos()
     {
         Gizmos.color = new Color(0, 0.5f, 1, 0.3f);
