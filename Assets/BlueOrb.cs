@@ -6,7 +6,6 @@ public class BlueOrb : MonoBehaviour
 {
     [Header("Configuración de Detección")]
     [SerializeField] private float detectionRadius = 1.5f;
-    [SerializeField] private LayerMask playerLayer;
     
     private bool playerIsInside = false;
 
@@ -18,7 +17,7 @@ public class BlueOrb : MonoBehaviour
     private void DetectPlayer()
     {
         // Detectar colliders en el radio especificado
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRadius, playerLayer);
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRadius);
         
         bool foundPlayerThisFrame = false;
         PlayerController playerController = null;

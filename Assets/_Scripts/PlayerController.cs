@@ -98,6 +98,10 @@ public class PlayerController : MonoBehaviour
         // Cooldown del sidestep
         if (sidestepCooldownTimer > 0f)
             sidestepCooldownTimer -= Time.deltaTime;
+
+        // Si por ejemplo te chocas contra una pared, mueres
+        if (controller.velocity.z < 0.5f)
+            Destroy(gameObject);
     }
 
     private float CalculateSidestepVelocity()
@@ -147,8 +151,6 @@ public class PlayerController : MonoBehaviour
     private void OnJump(InputAction.CallbackContext ctx)
     {
         if (!isGrounded) return;
-
-        print("Salto realizado");
         verticalVelocity = jumpForce;
     }
 
@@ -174,5 +176,13 @@ public class PlayerController : MonoBehaviour
         
         // Se le da la vuelta a la cámara
         transform.Rotate(Vector3.forward, 180f);
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (hit.gameObject.CompareTag("Death"))
+        {
+            Destroy(gameObject);
+        }
     }
 }
