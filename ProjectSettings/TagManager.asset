@@ -5,11 +5,13 @@ TagManager:
   serializedVersion: 2
   tags:
   - Death
+  - DestructibleBlock
+  - GG
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
   - 
