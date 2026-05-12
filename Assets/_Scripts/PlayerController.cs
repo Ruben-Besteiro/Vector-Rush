@@ -38,14 +38,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float sidestepDuration = 0.15f;
     [SerializeField] private float sidestepCooldown = 0.5f;
 
-    [Header("Aceleración Lateral")]
-    [SerializeField] private float lateralAcceleration = 2f;
-    [SerializeField] private float maxLateralSpeedMultiplier = 1.5f;
-    [SerializeField] private float edgeThreshold = 0.05f;
-    [SerializeField] private float maxPhysicalLateralVelocity = 7.5f;
-    private float currentLateralSpeed;
-    private float lastMouseX;
-    private float lastEdgeSide = 0f; // -1: Izquierda, 1: Derecha, 0: Centro
+    [SerializeField] private float maxPhysicalLateralVelocity;
+
 
     private Vector3 startPos;
 
@@ -60,7 +54,6 @@ public class PlayerController : MonoBehaviour
         controller = GetComponent<CharacterController>();
         defaultGravity = gravity;
         defaultJumpForce = jumpForce;
-        currentLateralSpeed = lateralSpeed;
     }
 
     void OnEnable()
@@ -183,31 +176,8 @@ public class PlayerController : MonoBehaviour
             if (mainCamera == null) return 0f;
         }
 
-        // Lógica de aceleración si el usuario deja el ratón en el borde de la pantalla
-        float mouseX = Input.mousePosition.x;
-        float screenW = Screen.width;
-        float mouseDeltaX = Mathf.Abs(mouseX - lastMouseX);
-        lastMouseX = mouseX;
+        // Movimiento lateral basado en la posición del ratón
 
-        // Determinamos en qué lado estamos ahora (0 centro, -1 izquierda, 1 derecha)
-        float currentEdgeSide = 0f;
-        if (mouseX < screenW * edgeThreshold) currentEdgeSide = -1f;
-        else if (mouseX > screenW * (1f - edgeThreshold)) currentEdgeSide = 1f;
-
-        // Solo aceleramos si estamos en un borde, es el MISMO borde que antes y el ratón no se mueve
-        if (currentEdgeSide != 0f && currentEdgeSide == lastEdgeSide && mouseDeltaX < 0.1f)
-        {
-            currentLateralSpeed += lateralAcceleration * Time.deltaTime;
-            currentLateralSpeed = Mathf.Min(currentLateralSpeed, lateralSpeed * maxLateralSpeedMultiplier);
-        }
-        else
-        {
-            // Resetear inmediatamente al valor base si movemos el ratón o salimos del borde
-            currentLateralSpeed = lateralSpeed;
-        }
-
-        lastEdgeSide = currentEdgeSide;
-        Mathf.Clamp(currentLateralSpeed, lateralSpeed, lateralSpeed * maxLateralSpeedMultiplier);
 
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         // Creamos un plano a la altura actual del jugador para evitar que el raycast falle si no hay suelo o está en el aire
@@ -216,7 +186,8 @@ public class PlayerController : MonoBehaviour
         if (groundPlane.Raycast(ray, out float distance))
         {
             Vector3 worldMousePos = ray.GetPoint(distance);
-            float targetX = Mathf.Lerp(transform.position.x, worldMousePos.x, currentLateralSpeed * Time.deltaTime);
+            float targetX = Mathf.Lerp(transform.position.x, worldMousePos.x, lateralSpeed * Time.deltaTime);
+
             float deltaX = targetX - transform.position.x;
             
             // Calculamos la velocidad y la limitamos para tratar de evitar que se salga
@@ -230,6 +201,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext ctx)
     {
+        print("Saltando");
         if (!isGrounded) return;
         verticalVelocity = jumpForce;
     }
@@ -299,6 +271,10 @@ public class PlayerController : MonoBehaviour
         isDashing = false;
         isSidestepping = false;
         verticalVelocity = 0f;
+        foreach (Coin coin in GameManager.Instance.coinList)
+            coin.gameObject.SetActive(true);
+        GameManager.Instance.coinsCollected = 0;
+
         
         if (gravity != defaultGravity) InvertGravity();
         MusicManager.Instance.RestartMusic();

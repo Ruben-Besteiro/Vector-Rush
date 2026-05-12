@@ -19,7 +19,9 @@ public class Coin : MonoBehaviour
         {
             if (hitCollider.CompareTag("Player"))
             {
-                Destroy(gameObject);
+                GameManager.Instance.coinsCollected++;
+                print("Llevas " + GameManager.Instance.coinsCollected);
+                gameObject.SetActive(false);
             }
         }
     }
