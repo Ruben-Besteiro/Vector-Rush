@@ -260,6 +260,10 @@ public class PlayerController : MonoBehaviour
                 Destroy(hit.gameObject);
             else
                 Die();
+
+        // Si cae en agua también se muere pero solo si es desde arriba
+        if (hit.gameObject.CompareTag("Water") && hit.normal.y > 0.7f)
+            Die();
         
         if (hit.gameObject.CompareTag("Death"))
             Die();
